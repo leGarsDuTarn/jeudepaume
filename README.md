@@ -1,24 +1,18 @@
-# README
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+# Jeu de Paume
 
-Things you may want to cover:
+🚧 Projet en cours de développement — MVP prévu 2025 - 2026 🚧
 
-* Ruby version
+**Jeu de Paume** est une application citoyenne qui centralise les informations sur les élus français :
+- Salaires et indemnités
+- Avantages matériels
+- Présence et activité parlementaire
+- Patrimoine déclaré
+- Mandats passés et actuels
 
-* System dependencies
+## Objectif
+Offrir une transparence claire, sourcée et accessible à tous les citoyens, en s'appuyant uniquement sur des données publiques (Assemblée nationale, Sénat, HATVP, Légifrance, data.gouv.fr).
 
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+## État du projet
+Actuellement en développement (phase MVP).
+Plus d'infos seront communiquées lors du lancement officiel.
