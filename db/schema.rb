@@ -10,10 +10,22 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_084043) do
+ActiveRecord::Schema[8.0].define(version: 2025_09_30_091654) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "constituencies", force: :cascade do |t|
+    t.citext "slug", null: false
+    t.string "name", null: false
+    t.string "level", null: false
+    t.string "insee_code"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["insee_code"], name: "index_constituencies_on_insee_code", unique: true
+    t.index ["name", "level"], name: "index_constituencies_on_name_and_level", unique: true
+    t.index ["slug"], name: "index_constituencies_on_slug", unique: true
+  end
 
   create_table "people", force: :cascade do |t|
     t.citext "slug", null: false
