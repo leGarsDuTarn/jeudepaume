@@ -9,9 +9,8 @@ class CreateInstitutions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :slug, null: false, unique: true
+    add_index :institutions, :slug, unique: true
     add_index :institutions, :name
     add_index :institutions, :kind
-    add_index :institutions, [ :name, :kind ], unique: true
   end
 end
