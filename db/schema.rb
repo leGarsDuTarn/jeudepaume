@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_09_30_095028) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_01_061853) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -60,6 +60,21 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_095028) do
     t.index ["slug"], name: "index_people_on_slug", unique: true
   end
 
+  create_table "political_groups", force: :cascade do |t|
+    t.citext "slug", null: false
+    t.string "name", null: false
+    t.string "short_name"
+    t.string "color_hex"
+    t.bigint "institution_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["institution_id"], name: "index_political_groups_on_institution_id"
+    t.index ["name", "institution_id"], name: "index_political_groups_on_name_and_institution_id", unique: true
+    t.index ["name"], name: "index_political_groups_on_name"
+    t.index ["short_name"], name: "index_political_groups_on_short_name"
+    t.index ["slug"], name: "index_political_groups_on_slug", unique: true
+  end
+
   create_table "sources", force: :cascade do |t|
     t.citext "slug", null: false
     t.string "title"
@@ -77,4 +92,6 @@ ActiveRecord::Schema[8.0].define(version: 2025_09_30_095028) do
     t.index ["sourceable_type", "sourceable_id"], name: "index_sources_on_sourceable"
     t.index ["url"], name: "index_sources_on_url"
   end
+
+  add_foreign_key "political_groups", "institutions"
 end
