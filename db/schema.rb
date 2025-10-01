@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_01_061853) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_01_064340) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
@@ -36,6 +36,27 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_061853) do
     t.index ["kind"], name: "index_institutions_on_kind"
     t.index ["name"], name: "index_institutions_on_name"
     t.index ["slug"], name: "index_institutions_on_slug", unique: true
+  end
+
+  create_table "mandates", force: :cascade do |t|
+    t.string "role", null: false
+    t.string "status"
+    t.date "started_on", null: false
+    t.date "ended_on"
+    t.string "seat_label"
+    t.string "source"
+    t.bigint "person_id", null: false
+    t.bigint "political_group_id"
+    t.bigint "institution_id", null: false
+    t.bigint "constituency_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["constituency_id"], name: "index_mandates_on_constituency_id"
+    t.index ["institution_id"], name: "index_mandates_on_institution_id"
+    t.index ["person_id", "institution_id", "started_on"], name: "index_mandates_on_person_id_and_institution_id_and_started_on"
+    t.index ["person_id"], name: "index_mandates_on_person_id"
+    t.index ["political_group_id"], name: "index_mandates_on_political_group_id"
+    t.check_constraint "ended_on IS NULL OR ended_on >= started_on", name: "chk_mandates_chronology"
   end
 
   create_table "people", force: :cascade do |t|
@@ -93,5 +114,9 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_061853) do
     t.index ["url"], name: "index_sources_on_url"
   end
 
+  add_foreign_key "mandates", "constituencies"
+  add_foreign_key "mandates", "institutions"
+  add_foreign_key "mandates", "people"
+  add_foreign_key "mandates", "political_groups"
   add_foreign_key "political_groups", "institutions"
 end
