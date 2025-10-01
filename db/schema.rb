@@ -10,10 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_01_191041) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_01_194631) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "assets_statements", force: :cascade do |t|
+    t.date "filed_on", null: false
+    t.string "kind", null: false
+    t.integer "total_assets_cents"
+    t.text "document_url"
+    t.text "document_meta"
+    t.bigint "person_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["filed_on"], name: "index_assets_statements_on_filed_on"
+    t.index ["person_id", "filed_on", "kind"], name: "index_assets_statements_on_person_id_and_filed_on_and_kind", unique: true
+    t.index ["person_id"], name: "index_assets_statements_on_person_id"
+    t.check_constraint "total_assets_cents IS NULL OR total_assets_cents >= 0", name: "chk_assets_total_nonneg"
+  end
 
   create_table "attendances", force: :cascade do |t|
     t.string "scope", null: false
@@ -150,6 +165,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_191041) do
     t.index ["url"], name: "index_sources_on_url"
   end
 
+  add_foreign_key "assets_statements", "people"
   add_foreign_key "attendances", "mandates"
   add_foreign_key "compensations", "mandates"
   add_foreign_key "mandates", "constituencies"
