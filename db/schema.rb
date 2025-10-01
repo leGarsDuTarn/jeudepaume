@@ -10,10 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_10_01_153013) do
+ActiveRecord::Schema[8.0].define(version: 2025_10_01_191041) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "attendances", force: :cascade do |t|
+    t.string "scope", null: false
+    t.string "scope_ref"
+    t.integer "presence_count", default: 0, null: false
+    t.integer "absence_count", default: 0, null: false
+    t.decimal "vote_participation_rate", precision: 5, scale: 2
+    t.string "source"
+    t.bigint "mandate_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["mandate_id", "scope", "scope_ref"], name: "index_attendances_on_mandate_id_and_scope_and_scope_ref"
+    t.index ["mandate_id"], name: "index_attendances_on_mandate_id"
+    t.index ["scope"], name: "index_attendances_on_scope"
+    t.check_constraint "absence_count >= 0", name: "chk_attendance_absence_nonneg"
+    t.check_constraint "presence_count >= 0", name: "chk_attendance_presence_nonneg"
+    t.check_constraint "vote_participation_rate IS NULL OR vote_participation_rate >= 0::numeric AND vote_participation_rate <= 100::numeric", name: "chk_attendance_vote_rate_range"
+  end
 
   create_table "compensations", force: :cascade do |t|
     t.string "kind", null: false
@@ -132,6 +150,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_10_01_153013) do
     t.index ["url"], name: "index_sources_on_url"
   end
 
+  add_foreign_key "attendances", "mandates"
   add_foreign_key "compensations", "mandates"
   add_foreign_key "mandates", "constituencies"
   add_foreign_key "mandates", "institutions"
