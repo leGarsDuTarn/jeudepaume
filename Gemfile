@@ -50,9 +50,14 @@ gem "thruster", require: false
 
 # Utilisation de devise pour la création de compte admin et citoyen
 gem 'devise'
-# # FriendlyId = génère automatiquement des slugs lisibles dans les URLs
+
+# FriendlyId = génère automatiquement des slugs lisibles dans les URLs
 # Exemple : /people/42 → /people/emmanuel-macron
 gem "friendly_id", "~> 5.5"
+
+# Faker pour seed et test via factory_bot
+gem 'faker'
+
 
 
 
