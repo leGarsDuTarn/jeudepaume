@@ -50,9 +50,15 @@ gem "thruster", require: false
 
 # Utilisation de devise pour la création de compte admin et citoyen
 gem 'devise'
-# # FriendlyId = génère automatiquement des slugs lisibles dans les URLs
+
+# FriendlyId = génère automatiquement des slugs lisibles dans les URLs
 # Exemple : /people/42 → /people/emmanuel-macron
 gem "friendly_id", "~> 5.5"
+
+# Faker pour seed et test via factory_bot
+gem 'faker'
+
+
 
 
 group :development, :test do
@@ -64,6 +70,10 @@ group :development, :test do
 
   # Omakase Ruby styling [https://github.com/rails/rubocop-rails-omakase/]
   gem "rubocop-rails-omakase", require: false
+
+  # Installation RSpec + factory_bot pour les tests
+  gem 'rspec-rails'
+  gem 'factory_bot_rails'
 end
 
 group :development do
