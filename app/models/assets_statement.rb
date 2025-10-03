@@ -1,0 +1,2 @@
+class AssetsStatement < ApplicationRecord
+end

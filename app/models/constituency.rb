@@ -1,0 +1,2 @@
+class Constituency < ApplicationRecord
+end
