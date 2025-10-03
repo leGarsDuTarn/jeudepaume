@@ -1,0 +1,2 @@
+class Mandate < ApplicationRecord
+end

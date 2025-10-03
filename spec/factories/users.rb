@@ -8,6 +8,9 @@ FactoryBot.define do
     # Mais si l'enum change alors ça casse => + fragile
     # :citoyen => + robuste
     role { :citoyen }
+    user_name { Faker::Internet.username }
+    first_name { Faker::Name.first_name }
+    last_name {Faker::Name.last_name }
 
     # Ici 'trait' permet d'être DRY
     # -> évite d'écrire create(:user, role: :admin)
