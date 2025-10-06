@@ -4,19 +4,23 @@ class User < ApplicationRecord
 
   enum :role, { citoyen: 0, admin: 1 }
   # Callback -> voir section private
-  before_validation :normalize_user_name
+  # will_save_change_to_user_name? && user_name.present? => évite de rentrer dans la méthode
+  # -> gain de performance, évite des requêtes inutiles
+  # idem pour normalize_names
+  before_validation :normalize_user_name, if: -> { will_save_change_to_user_name? && user_name.present? }
+  before_validation :normalize_names, if: -> { will_save_change_to_first_name? || will_save_change_to_last_name? }
 
   validates :user_name,
     presence: { message: "Veuillez renseigner un nom d'utilisateur" },
-    uniqueness: true, # Citext gére déjà la casse côté DB
-    length: { minimum: 3, maximum: 20, message: "Caractères : mini 3 - max 20" },
+    uniqueness: true, # Citext gère déjà la casse côté DB
+    length: { minimum: 3, maximum: 20, message: "Caractères : min 3 - max 20" },
     format: { with: /\A[a-z0-9_]+\z/, message: "seulement lettres, chiffres et _" },
     exclusion: { in: %w[admin support root www api system jeudepaume], message: "n'est pas disponible" }
 
   # Cette REGEX autorise uniquement des prénoms/noms composés de lettres Unicode,
   # avec des espaces, des points, des apostrophes ou bien des tirets entre les mots.
-  # Exemple valides : "Jean", "Jean-Luc", "O'Connor", "J. R. R. Tolkien", "Élodie"
-  # Exemple invalides : "Jean3", "Jean_", "Jean-", " Jean "
+  # Exemples valides : "Jean", "Jean-Luc", "O'Connor", "J. R. R. Tolkien", "Élodie"
+  # Exemples invalides : "Jean3", "Jean_", "Jean-", " Jean "
   NAME_REGEX = /\A\p{L}+(?:[ .'-]\p{L}+)*\z/u.freeze
   validates :first_name,
     presence: { message: "Veuillez renseigner un prénom" },
@@ -34,21 +38,21 @@ class User < ApplicationRecord
     s = (I18n.transliterate(s) rescue s) # accents -> ASCII si dispo
     # espaces -> "_"
     s = s.gsub(/\s+/, "_")
-      # Valide tout sauf [A-Za-z0-9_] sinon "_"
+      # Remplace tout sauf [A-Za-z0-9_] par "_"
       .gsub(/[^\w]/, "_")
       # Ici ça compresse "___" en "_"
       .gsub(/_+/, "_")
-      # enlève les espaces au début et à la fin
+      # enlève les underscores '_' au début et à la fin
       .gsub(/^_+|_+$/, "")
-    self.user_name = s
+    self.user_name = s.presence
   end
 
   def normalize_names
-    self.first_name = normalize_persson_name(first_name)
-    self.last_name = normalize_persson_name(last_name)
+    self.first_name = normalize_person_name(first_name)
+    self.last_name = normalize_person_name(last_name)
   end
 
-  def normalize_persson_name(value)
+  def normalize_person_name(value)
     s = value.to_s.unicode_normalize(:nfc).strip
     # apostrophes typographiques -> apostrophe simple
     s = s.tr("’`´", "'")
@@ -62,10 +66,10 @@ class User < ApplicationRecord
       .gsub(/\s*'\s*/, "'")
       # pas de séparateur en bord
       .gsub(/\A[.'-]+|[.'-]+\z/, "")
-  return nil if s.blank?
+    return nil if s.blank?
     # Ici ça découpe par espaces
     s.split(" ").map { |w|
-      # Puis pour chaque mot,ça découpe par tirets
+      # Puis pour chaque mot, ça découpe par tirets
       w.split("-").map { |h|
         # Puis pour chaque sous-mot, ça découpee par apostrophes
         # mb_chars.capitalize permet de capitaliser chaque segment
