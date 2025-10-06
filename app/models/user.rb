@@ -6,13 +6,16 @@ class User < ApplicationRecord
   # Callback -> voir section private
   # will_save_change_to_user_name? && user_name.present? => évite de rentrer dans la méthode
   # -> gain de performance, évite des requêtes inutiles
-  # idem pour normalize_names
+  # idem pour normalize_names & normalize_email
   before_validation :normalize_user_name, if: -> { will_save_change_to_user_name? && user_name.present? }
   before_validation :normalize_names, if: -> { will_save_change_to_first_name? || will_save_change_to_last_name? }
+  before_validation :normalize_email, if: -> { will_save_change_to_email? && email.present? }
+
 
   validates :user_name,
     presence: { message: "Veuillez renseigner un nom d'utilisateur" },
-    uniqueness: true, # Citext gère déjà la casse côté DB
+    # Ici, 'citext' gère déjà la casse côté DB -> pas besoin de case_sensitive: false
+    uniqueness: { message: "Oups ! Ce nom d'utilisateur est déjà pris." },
     length: { minimum: 3, maximum: 20, message: "Caractères : min 3 - max 20" },
     format: { with: /\A[a-z0-9_]+\z/, message: "seulement lettres, chiffres et _" },
     exclusion: { in: %w[admin support root www api system jeudepaume], message: "n'est pas disponible" }
@@ -30,6 +33,19 @@ class User < ApplicationRecord
     presence: { message: "Veuillez renseigner un nom" },
     length: { minimum: 1, maximum: 50 },
     format: { with: NAME_REGEX }
+
+  # <-------> Logique métier PASSWORD <-------->
+
+  VALID_PASSWORD_REGEX = /\A
+  (?=.{8,72}\z)         # De 8 à 72 caractères
+  (?=.*\d)              # Au moins un chiffre
+  (?=.*[a-z])           # Au moins une minuscule
+  (?=.*[A-Z])           # Au moins une majuscule
+  (?=.*[^[:alnum:]\s])  # Au moins un caractère spécial (espace non valide)
+  (?!.*\s)              # Pas d'espaces
+  /x
+  validates :password, format: { with: VALID_PASSWORD_REGEX, message:
+  "Doit contenir : min 8 caractères, 0 espace, 1 majuscule, 1 minuscule, 1 chiffre et un caractère spécial." }, if: :password_required?
 
   private
 
@@ -77,5 +93,9 @@ class User < ApplicationRecord
       }.join("-")
       # Enfin ça rassemble successivement avec ', puis -, puis l’espace.
     }.join(" ")
+  end
+
+  def normalize_email
+    self.email = email.to_s.strip.downcase.presence
   end
 end
