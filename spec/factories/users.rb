@@ -10,7 +10,7 @@ FactoryBot.define do
     role { :citoyen }
     user_name { Faker::Internet.username }
     first_name { Faker::Name.first_name }
-    last_name {Faker::Name.last_name }
+    last_name { Faker::Name.last_name }
 
     # Ici 'trait' permet d'être DRY
     # -> évite d'écrire create(:user, role: :admin)
