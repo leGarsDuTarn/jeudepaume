@@ -81,6 +81,13 @@ RSpec.describe User, type: :model, aggregate_failures: true do
       expect(user.errors[:user_name]).to be_present
       expect(user.errors[:user_name]).to include("n'est pas disponible")
     end
+
+    it "n'est pas valide avec un user_name réservé même avec des majuscule" do
+      user = build(:user, user_name: "ADMIN")
+      expect(user).not_to be_valid
+      expect(user.errors[:user_name]).to be_present
+      expect(user.errors[:user_name]).to include("n'est pas disponible")
+    end
   end
 
   context "Test de validation et de conformité de FIRST_NAME & LAST_NAME" do
@@ -131,6 +138,59 @@ RSpec.describe User, type: :model, aggregate_failures: true do
       expect(u).to be_valid
       expect(u.first_name).to eq("O'Mallet")
       expect(u.last_name).to eq("L'Ptit-Nicolas")
+    end
+  end
+
+  context "Test de validation et de conformité de PASSWORD" do
+    it "le test est valide avec un mot de pass fort" do
+      u = build(:user, password: "Password1!", password_confirmation: "Password1!")
+      expect(u).to be_valid
+    end
+
+    it "n'est pas valide avec un mot de passe sans caractère spécial" do
+      u = build(:user, password: "Password1", password_confirmation: "Password1")
+      expect(u).not_to be_valid
+      expect(u.errors[:password]).to be_present
+      expect(u.errors[:password]).to include("Doit contenir : min 8 caractères, 0 espace, 1 majuscule, 1 minuscule, 1 chiffre et un caractère spécial.")
+    end
+
+    it "les test valide 72 caractères mais n'est pas valide avec 73" do
+      # (72 - 4) -> -4 = 'Aa1!' ici ça couvre les 4 classes exigées
+      # Puis on fait 68 * "x" -> (72 - 4 = 68)
+      # Donc 72 caractères au total
+      ok = "A" + "a" + "1" + "!" + "x" * (72 - 4)
+      ko = ok + "y"
+
+      expect(build(:user, password: ok, password_confirmation: ok)).to be_valid
+      u = build(:user, password: ko, password_confirmation: ko)
+      expect(u).not_to be_valid
+      expect(u.errors[:password]).to be_present
+    end
+
+    it "le test est valide avec 8 caractères mais n'est pas valide avec 7" do
+      # 8 au total, avec toutes les classes (Maj, min, chiffre, spécial)
+      ok = "Aa1!" + "x" * (8 - 4)  # => "Aa1!xxxx"
+      ko = "Aa1!" + "x" * (7 - 4)  # => "Aa1!xxx" (7)
+
+      expect(build(:user, password: ok, password_confirmation: ok)).to be_valid
+      u = build(:user, password: ko, password_confirmation: ko)
+      expect(u).not_to be_valid
+      expect(u.errors[:password]).to be_present
+    end
+  end
+
+  context "Test de validation et de conformité de EMAIL" do
+    it "n'est pas valide avec deux emails identiques à la casse près (citext)" do
+      create(:user, email: "Benjamin@GMAIL.com")
+      u = build(:user, email: "benjamin@gmail.com")
+      expect(u).not_to be_valid
+      expect(u.errors[:email]).to be_present
+    end
+
+    it "normalise l'email" do
+      u = build(:user, email: "    Benji@GMail.com    ")
+      expect(u).to be_valid
+      expect(u.email).to eq("benji@gmail.com")
     end
   end
 end
