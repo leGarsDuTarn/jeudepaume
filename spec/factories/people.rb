@@ -57,7 +57,7 @@ FactoryBot.define do
       gender { "male" }
     end
 
-    trait :birth_date do
+    trait :future_birth_date do
       birth_date { Date.today + 1 }
     end
 
