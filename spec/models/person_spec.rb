@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Person, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  context "Test de validation et de conformité SLUG CONTRAINTES & NORMALIZE" do
+    it "génération d'un slug à partir de full_name" do
+    end
+  end
 end
