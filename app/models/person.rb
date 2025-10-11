@@ -11,9 +11,11 @@ class Person < ApplicationRecord
   # Mode manuel -> si l'admin doit rentrer les infos à la main
   attr_accessor :manual_entry # ⚠️ le passer à true dans le controller -> @person.manual_entry = true
   # Ici en mode manuel les prénom/nom ou full_name est exigé
+  # Et la saisie admin doit être en JSON
   # Voir section private
   with_options if: :manual_entry? do
     validate :require_some_name
+    validate :json_text_fields_valid
   end
   # Normalisation avec .squish
   before_validation :squish_names!
@@ -38,7 +40,7 @@ class Person < ApplicationRecord
           format: { with: /\A[\p{L}\p{M}\s\-\'’.]+\z/u, message: "caractères non valides" },
           allow_blank: true
 
-  # Postal code FR (ex: "81000")
+  # Code Postal en FR (ex: "81000")
   validates :birth_postal_code,
            format: { with: /\A\d{5}\z/, message: "doit être 5 chiffres" },
            allow_blank: true
@@ -61,9 +63,6 @@ class Person < ApplicationRecord
 
   # Bio libre mais bornée
   validates :bio, length: { maximum: 10_000 }, allow_blank: true
-
-  # Champs texte censés contenir du JSON valide
-  validate :json_text_fields_valid
 
   # Helpers d'accès propre aux champs JSON texte
   def socials_hash
@@ -103,6 +102,7 @@ class Person < ApplicationRecord
   end
 
   def normalize_text_fields
+    self.gender        = gender.to_s.downcase.squish.presence
     self.nationality   = nationality.to_s.squish.presence
     self.image_url     = image_url.to_s.squish.presence
     self.image_meta    = image_meta.to_s.strip.presence
@@ -113,20 +113,33 @@ class Person < ApplicationRecord
     self.birth_place   = birth_place.to_s.squish.presence
   end
 
+  # Convertit un champ texte (censé contenir du JSON) en Hash Ruby,
+  # sans jamais faire planter l'app si la valeur est vide ou invalide.
   def parse_json_text(text)
+    # Si nil ou chaîne vide → on renvoie un Hash vide
     return {} if text.blank?
+    # Ici on essaye de parser le JSON
     JSON.parse(text)
+  # Si le contenu n'est pas un JSON valide, on intercepte l'erreur
+  # et on renvoie un Hash vide pour éviter un crash.
   rescue JSON::ParserError
     {}
   end
 
+  # Valide que certains champs texte (si RENSEIGNÉS) contiennent bien du JSON valide.
+  # Ne bloque pas si le champ est vide (allow_blank implicite ici).
   def json_text_fields_valid
+    # Les attributs à vérifier (colonnes TEXT censées contenir du JSON)
     %i[image_meta socials external_ids].each do |attr|
+      # Récupère dynamiquement la valeur de l'attribut (équivaut à self.image_meta, etc.)
       value = self.public_send(attr)
+      # Si vide → on ne valide pas le JSON mais on laisse passer
       next if value.blank?
       begin
+        # On essaie juste de parser pour vérifier la validité
         JSON.parse(value)
       rescue JSON::ParserError
+        # Si ce n'est pas du JSON valide → on ajoute une erreur de validation
         errors.add(attr, "doit être un JSON valide")
       end
     end
