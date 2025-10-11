@@ -2,6 +2,10 @@ class Institution < ApplicationRecord
   extend FriendlyId
   friendly_id :name, use: [ :slugged, :history ]
 
+  has_many :mandates, dependent: :destroy
+  has_many :people, through: :mandates
+  has_many :political_groups, dependent: :destroy
+
   KINDS = [
     "Assemblée nationale",
     "Sénat",
@@ -31,7 +35,7 @@ class Institution < ApplicationRecord
   private
 
   def normalize_fields
-    self.name = name.to_s.strip.presence
-    self.kind = kind.to_s.strip.presence
+    self.name = name.to_s.squish.presence
+    self.kind = kind.to_s.squish.presence
   end
 end
