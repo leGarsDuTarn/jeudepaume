@@ -4,7 +4,7 @@ FactoryBot.define do
 
     sequence(:full_name) do |n|
       first = Faker::Name.first_name
-      last = Faker::Name.lest_name
+      last = Faker::Name.last_name
       base = "#{first} #{last}".gsub(/[^\p{L}\p{M}\s\-\'’]/u, "").squish
       "#{base} #{n}"
     end
