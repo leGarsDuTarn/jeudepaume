@@ -58,7 +58,7 @@ FactoryBot.define do
     end
 
     trait :future_birth_date do
-      birth_date { Date.today + 1 }
+      birth_date { Time.zone.today + 1.day }
     end
 
     trait :with_bio do

@@ -2,7 +2,7 @@ class Person < ApplicationRecord
   extend FriendlyId
   # ':computed_full_name' = c'est la méthode qui renvoie le texte à slugifier
   # 'use: :slugged' = active le module de génération de slug de FriendlyId
-  friendly_id :computed_full_name, use: :slugged
+  friendly_id :computed_full_name, use: [ :slugged, :history ]
 
   has_many :mandates, dependent: :destroy
   has_many :institutions, through: :mandates
@@ -32,7 +32,7 @@ class Person < ApplicationRecord
            allow_blank: true
 
   validates :birth_date,
-           comparison: { less_than_or_equal_to: Date.today },
+           comparison: { less_than_or_equal_to: ->(_) { Time.zone.today } },
            allow_nil: true
 
   validates :birth_place,
@@ -75,7 +75,7 @@ class Person < ApplicationRecord
 
   # Source du slug : full_name prioritaire, sinon prénom + nom
   def computed_full_name
-    full_name.presence || [first_name, last_name].compact.join(" ").squish
+    full_name.presence || [ first_name, last_name ].compact.join(" ").squish
   end
 
   # Regénère le slug si le nom change
@@ -122,7 +122,7 @@ class Person < ApplicationRecord
     JSON.parse(text)
   # Si le contenu n'est pas un JSON valide, on intercepte l'erreur
   # et on renvoie un Hash vide pour éviter un crash.
-  rescue JSON::ParserError
+  rescue JSON::ParserError, TypeError
     {}
   end
 
@@ -138,7 +138,7 @@ class Person < ApplicationRecord
       begin
         # On essaie juste de parser pour vérifier la validité
         JSON.parse(value)
-      rescue JSON::ParserError
+      rescue JSON::ParserError, TypeError
         # Si ce n'est pas du JSON valide → on ajoute une erreur de validation
         errors.add(attr, "doit être un JSON valide")
       end
