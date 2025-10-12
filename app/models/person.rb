@@ -1,4 +1,6 @@
 class Person < ApplicationRecord
+  # Voir concern sourceable.rb
+  include Sourceable
   extend FriendlyId
   # ':computed_full_name' = c'est la méthode qui renvoie le texte à slugifier
   # 'use: :slugged' = active le module de génération de slug de FriendlyId

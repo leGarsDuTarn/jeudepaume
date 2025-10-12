@@ -1,4 +1,6 @@
 class Institution < ApplicationRecord
+  # Voir concern sourceable.rb
+  include Sourceable
   extend FriendlyId
   friendly_id :name, use: [ :slugged, :history ]
 
