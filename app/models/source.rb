@@ -1,4 +1,6 @@
 class Source < ApplicationRecord
+  extend FriendlyId
+  friendly_id :title, use: [ :slugged, :history ]
   belongs_to :sourceable, polymorphic: true
 
   # Normalisation + valeurs par défaut
