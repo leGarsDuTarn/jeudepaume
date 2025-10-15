@@ -2,6 +2,7 @@ FactoryBot.define do
   factory :mandate do
     association :person
     association :institution
+    association :constituency
     role { "Député" }
     started_on { Date.current - 1 }
     status { "en cours" }
