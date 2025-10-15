@@ -23,8 +23,6 @@ class Person < ApplicationRecord
   before_validation :squish_names!
   before_validation :normalize_text_fields
 
-  validates :slug, presence: true, uniqueness: true
-
   # Ici travail des régles métier de l'API.
   # Si l'API est vide 'allow_blank: true ou allow_nil: true' alors pas de blocage
   # souplesse ++++++

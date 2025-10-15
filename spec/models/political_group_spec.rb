@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe PoliticalGroup, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  # Smoke test -> test la factory source pour voir si elle est valide
+  it "factory valide" do
+    expect(build(:political_group)).to be_valid
+  end
 end
