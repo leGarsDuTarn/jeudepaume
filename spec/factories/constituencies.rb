@@ -1,6 +1,5 @@
 FactoryBot.define do
   factory :constituency do
-    
     sequence(:name) { |n| "Constituency #{n}" }
     level { "circonscription législative" }
     insee_code { nil }
