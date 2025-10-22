@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe Attendance, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  # Smoke test -> test la factory attendance pour voir si elle est valide
+  it "factory valide" do
+    expect(build(:attendance)).to be_valid
+  end
 end
