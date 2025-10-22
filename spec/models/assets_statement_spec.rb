@@ -1,5 +1,8 @@
 require 'rails_helper'
 
 RSpec.describe AssetsStatement, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  # Smoke test -> test la factory assets pour voir si elle est valide
+  it "factory valide" do
+    expect(build(:assets_statement)).to be_valid
+  end
 end
