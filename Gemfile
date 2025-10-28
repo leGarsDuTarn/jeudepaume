@@ -58,6 +58,9 @@ gem "friendly_id", "~> 5.5"
 # Faker pour seed et test via factory_bot
 gem 'faker'
 
+# Pundit pour les authorisations
+gem 'pundit'
+
 
 
 
