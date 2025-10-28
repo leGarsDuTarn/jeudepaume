@@ -15,4 +15,51 @@ Rails.application.routes.draw do
 
   # Defines the root path route ("/")
   # root "posts#index"
+
+  # ---- NAMESPACE ADMIN ----
+  namespace :admin do
+    root to: "dashboard#index"
+
+    resources :users
+    resources :people do
+      resources :mandates, only: %i[index new create edit]
+    end
+
+    resources :institutions do
+      resources :mandates, only: %i[index new create edit]
+    end
+
+    resources :political_groups
+    resources :constituencies
+
+    resources :mandates do
+      resources :compensations
+      resources :attendances
+      resources :assets
+    end
+
+    resources :sources
+  end
+
+  # ---- NAMESPACE PUBLIC ----
+  # Ici scope module: :public supprime le préfic d'URL mais garde le module contrôleur
+  # ex -> /elus/emmanuel-macron et pas /public/elus/emmanuel-macron
+  scope module: :public do
+    resources :people, only: %i[index show], path: "elus"
+    resources :institutions, only: %i[index show]
+    resources :political_groups, only: %i[index show]
+    resources :constituencies, only: %i[index show]
+    resources :mandates, only: %i[show]
+  end
+
+  # ---- API ----
+  namespace :api, defaults: { format: :json } do
+    namespace :v1 do
+      resources :people, only: %i[index show]
+      resources :institutions, only: %i[index show]
+      resources :political_groups, only: %i[index show]
+      resources :constituencies, only: %i[index show]
+      resources :mandates, only: %i[index show]
+    end
+  end
 end
